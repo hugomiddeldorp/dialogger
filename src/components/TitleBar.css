@@ -1,0 +1,9 @@
+.titleBar {
+  padding: 7pt 5pt 7pt 5pt;
+  flex-grow: 0 !important;
+}
+
+.titleBar h1 {
+  font-size: 16pt;
+  font-weight: 600;
+}

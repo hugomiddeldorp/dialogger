@@ -1,0 +1,13 @@
+.dialogueLine {
+  margin-bottom: 10pt;
+}
+
+h2 {
+  font-family: Spectral SC, sans-serif;
+  color: var(--colour-highlight);
+  text-align: center;
+}
+
+p {
+  font-family: Spectral;
+}

@@ -1,0 +1,20 @@
+body {
+    background-color: var(--colour-stone);
+    color: var(--colour-neutral-900);
+    font-family: Karla, sans-serif;
+    font-size: 13pt;
+}
+
+div#root {
+  height: 100%;
+}
+
+.appLayout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.appLayout div {
+  flex-grow: 1;
+}
