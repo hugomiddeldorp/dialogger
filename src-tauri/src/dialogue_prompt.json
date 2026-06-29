@@ -1,0 +1,44 @@
+{
+    "model": "gemini-3-flash-preview",
+    "generation_config": {
+        "temperature": 1,
+        "max_output_tokens": 65536,
+        "top_p": 0.95,
+        "thinking_level": "low"
+    },
+    "system_instruction": "You are an assistant generating a dialogue suitable for a beginner in casual French. The dialog should be between two people. The two people can either have a name (e.g., Lily) or a job function (if the dialogue is at a bank, one of the people will be the bank teller). Do not include any translations.",
+    "input": "Write a dialogue about ordering food at a restaurant, it should include getting a recommendation from the waiter, asking what is inside the dish, and some hesitation.",
+    "response_format": {
+        "type": "text",
+        "mime_type": "application/json",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "A short summary description of the topic of the dialogue"
+                },
+                "people": {
+                    "type": "array",
+                    "description": "The names (or role if for example the dialogue is with a butcher) of the people involved in the dialogue, in their order of apparition. This should only be two items.",
+                    "items": {
+                        "type": "string",
+                        "maxItems": 2
+                    }
+                },
+                "dialogue": {
+                    "type": "array",
+                    "description": "Each item represents a line of dialogue spoken by one person. The line should not contain the name of the person. It could be comprised of multiple sentences.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "title",
+                "people",
+                "dialogue"
+            ]
+        }
+    }
+}

@@ -1,4 +1,4 @@
-use std::{thread, time};
+mod gemini;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -19,7 +19,8 @@ pub fn run() {
 }
 
 #[tauri::command]
-async fn my_custom_command() {
-  thread::sleep(time::Duration::new(1, 0));
-  println!("I was invoked from JavaScript!");
+async fn my_custom_command() -> Result<String, String> {
+  gemini::generate_dialogue()
+    .await
+    .map_err(|e| e.to_string())
 }

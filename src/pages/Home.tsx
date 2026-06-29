@@ -24,6 +24,7 @@ export default function Home() {
       navigate("/dialogue");
     } catch (err) {
       setError(String(err));
+      console.log(error);
       setIsGenerating(false);
     }
   }
