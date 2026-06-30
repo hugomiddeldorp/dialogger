@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -35,6 +35,7 @@ export default function Home() {
         <div className="home">Generating...</div>
       ) : (
         <div className="home">
+          <Link to="/settings">Settings</Link>
           <form
             onSubmit={() => handleGenerate()}
             method=""
