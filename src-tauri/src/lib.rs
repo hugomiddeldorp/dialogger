@@ -1,7 +1,19 @@
 use tauri::Manager;
+use serde::{Serialize, Deserialize};
 use std::fs;
 
 mod gemini;
+
+#[derive(Serialize, Deserialize, Default)]
+struct ApiConfig {
+  api_key: String
+}
+
+fn get_api_file(app_handle: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+  let config_dir = &app_handle.path().app_data_dir()
+    .map_err(|e| e.to_string())?;
+  Ok(config_dir.join("api_key.json"))
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -24,19 +36,26 @@ pub fn run() {
 }
 
 #[tauri::command]
-async fn my_custom_command() -> Result<String, String> {
-  gemini::generate_dialogue()
+async fn my_custom_command(app_handle: tauri::AppHandle) -> Result<String, String> {
+  let key_path = get_api_file(&app_handle)?;
+  let api_config = fs::read_to_string(&key_path)
+    .map_err(|e| e.to_string())?;
+  let config_json: ApiConfig = serde_json::from_str(&api_config)
+    .map_err(|e| e.to_string())?;
+  let api_key = config_json.api_key;
+
+  gemini::generate_dialogue(api_key)
     .await
     .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn save_api_key(app_handle: tauri::AppHandle, key_string: &str) -> Result<(), String> {
-  let config_dir = app_handle.path().app_data_dir()
+async fn save_api_key(app_handle: tauri::AppHandle, key_string: String) -> Result<(), String> {
+  let key_path = get_api_file(&app_handle)?;
+  let api_config = ApiConfig { api_key: key_string };
+  let json = serde_json::to_string(&api_config)
     .map_err(|e| e.to_string())?;
-  let key_path = config_dir.join("api_key.json");
-
-  fs::write(&key_path, format!(r#"{{"api_key": "{key_string}"}}"#))
+  fs::write(&key_path, json)
     .map_err(|e| e.to_string())?;
 
   Ok(())

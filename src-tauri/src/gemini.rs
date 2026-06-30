@@ -45,13 +45,13 @@ fn load_prompt() -> Result<Value, Box<dyn std::error::Error>> {
   Ok(request_body)
 }
 
-pub async fn generate_dialogue() -> Result<String, Box<dyn std::error::Error>> {
+pub async fn generate_dialogue(api_key: String) -> Result<String, Box<dyn std::error::Error>> {
   let request_body = load_prompt()?;
-
+  
   let client = reqwest::Client::new();
   let response: GeminiResponse = client.post("https://generativelanguage.googleapis.com/v1beta/interactions")
     .json(&request_body)
-    .header("x-goog-api-key", "")
+    .header("x-goog-api-key", api_key)
     .header("Content-Type", "application/json")
     .send()
     .await?
