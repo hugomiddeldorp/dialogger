@@ -1,11 +1,11 @@
-CREATE TABLE conversations (
+CREATE TABLE IF NOT EXISTS conversations (
     uuid TEXT,
     title TEXT NOT NULL,
     created_date NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (uuid)
 );
 
-CREATE TABLE dialogue_lines (
+CREATE TABLE IF NOT EXISTS dialogue_lines (
     id INTEGER,
     conversation_id TEXT,
     "order" INTEGER NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE dialogue_lines (
     FOREIGN KEY (conversation_id) REFERENCES conversations (uuid)
 );
 
-CREATE TABLE participants (
+CREATE TABLE IF NOT EXISTS participants (
     id INTEGER,
     conversation_id TEXT,
     "name" TEXT NOT NULL,

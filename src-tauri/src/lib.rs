@@ -1,12 +1,21 @@
 use tauri::Manager;
+use rusqlite::Connection;
 use serde::{Serialize, Deserialize};
 use std::fs;
+use std::sync::Mutex;
 
 mod gemini;
+mod db;
+
+const SCHEMA: &str = include_str!("../sql/schema.sql");
 
 #[derive(Serialize, Deserialize, Default)]
 struct ApiConfig {
   api_key: String
+}
+
+struct AppState {
+  conn: Mutex<Connection>
 }
 
 fn get_api_file(app_handle: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
@@ -19,7 +28,13 @@ fn get_api_file(app_handle: &tauri::AppHandle) -> Result<std::path::PathBuf, Str
 pub fn run() {
   tauri::Builder::default()
     .setup(|app| {
-      let config_dir = app.path().app_data_dir()?;
+      let config_dir = app.path().app_data_dir()
+        .expect("could not result app data dir");
+      let mut conn = Connection::open(config_dir.join("app.db"))
+        .expect("failed to open DB");
+      conn.execute_batch(SCHEMA)?;
+
+      app.manage(AppState { conn: Mutex::new(conn) });
 
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -36,7 +51,8 @@ pub fn run() {
 }
 
 #[tauri::command]
-async fn my_custom_command(app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn my_custom_command(state: tauri::State<'_, AppState>, app_handle: tauri::AppHandle) -> Result<String, String> {
+  // TODO: This assumes the config file exists, which isn't true on first run
   let key_path = get_api_file(&app_handle)?;
   let api_config = fs::read_to_string(&key_path)
     .map_err(|e| e.to_string())?;
@@ -44,8 +60,12 @@ async fn my_custom_command(app_handle: tauri::AppHandle) -> Result<String, Strin
     .map_err(|e| e.to_string())?;
   let api_key = config_json.api_key;
 
-  gemini::generate_dialogue(api_key)
+  let dialogue = gemini::generate_dialogue(api_key)
     .await
+    .map_err(|e| e.to_string())?;
+
+  let mut conn = state.conn.lock().unwrap();
+  db::write_dialogue(&mut conn, &dialogue)
     .map_err(|e| e.to_string())
 }
 
