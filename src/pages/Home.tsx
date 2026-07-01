@@ -20,8 +20,8 @@ export default function Home() {
     setError("");
 
     try {
-      const response = await invoke("my_custom_command");
-      navigate("/dialogue");
+      const conversationId = await invoke("my_custom_command");
+      navigate(`/dialogue/${conversationId}`);
     } catch (err) {
       setError(String(err));
       console.log(error);

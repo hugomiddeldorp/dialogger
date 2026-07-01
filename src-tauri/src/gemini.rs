@@ -1,5 +1,5 @@
 use serde_json::Value;
-use serde::Deserialize;
+use serde::{ Serialize, Deserialize };
 use std::fs;
 
 #[derive(Deserialize, Debug)]
@@ -17,7 +17,7 @@ struct ContentBlock {
     text: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dialogue {
     pub title: String,
     pub people: [String; 2],

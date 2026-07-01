@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
-        <Route path="/dialogue" element={<Dialogue />} />
+        <Route path="/dialogue/:conversationId" element={<Dialogue />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
