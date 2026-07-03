@@ -16,6 +16,7 @@
 .home form input {
   flex-grow: 1;
   padding: 10pt;
+  padding-right: 30pt;
   border: var(--colour-neutral-400) 1px solid;
   border-radius: 20pt;
 }

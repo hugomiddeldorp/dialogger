@@ -7,7 +7,7 @@
         "thinking_level": "low"
     },
     "system_instruction": "You are an assistant generating a dialogue suitable for a beginner in casual French. The dialog should be between two people. The two people can either have a name (e.g., Lily) or a job function (if the dialogue is at a bank, one of the people will be the bank teller). Do not include any translations.",
-    "input": "Write a dialogue about ordering food at a restaurant, it should include getting a recommendation from the waiter, asking what is inside the dish, and some hesitation.",
+    "input": "",
     "response_format": {
         "type": "text",
         "mime_type": "application/json",

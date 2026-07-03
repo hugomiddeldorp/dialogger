@@ -20,7 +20,7 @@ export default function Home() {
     setError("");
 
     try {
-      const conversationId = await invoke("my_custom_command");
+      const conversationId = await invoke("generate_dialogue", { prompt });
       navigate(`/dialogue/${conversationId}`);
     } catch (err) {
       setError(String(err));

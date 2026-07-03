@@ -1,6 +1,5 @@
 use serde_json::Value;
 use serde::{ Serialize, Deserialize };
-use std::fs;
 
 #[derive(Deserialize, Debug)]
 struct GeminiResponse {
@@ -39,15 +38,7 @@ fn extract_dialogue(resp: GeminiResponse) -> anyhow::Result<Dialogue> {
     Ok(dialogue)
 }
 
-fn load_prompt() -> anyhow::Result<Value> {
-  let request_file = fs::read_to_string("src/dialogue_prompt.json")?;
-  let request_body: Value = serde_json::from_str(&request_file)?;
-  Ok(request_body)
-}
-
-pub async fn generate_dialogue(api_key: String) -> anyhow::Result<Dialogue> {
-  let request_body = load_prompt()?;
-  
+pub async fn generate_dialogue(api_key: String, request_body: Value) -> anyhow::Result<Dialogue> {
   // TODO: this is very fragile if Gemini doesn't return exactly the correct format
   let client = reqwest::Client::new();
   let response: GeminiResponse = client.post("https://generativelanguage.googleapis.com/v1beta/interactions")

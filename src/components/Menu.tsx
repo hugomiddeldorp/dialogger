@@ -17,7 +17,6 @@ export default function Menu({
     invoke("get_conversations")
       .then(setConversations)
       .catch((e) => setError(String(e)));
-    console.log(conversations);
   }, []);
 
   return (

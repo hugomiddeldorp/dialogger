@@ -1,6 +1,7 @@
 use tauri::Manager;
 use rusqlite::Connection;
 use serde::{Serialize, Deserialize};
+use serde_json::{json, Value};
 use std::fs;
 use std::sync::Mutex;
 
@@ -27,6 +28,13 @@ fn get_api_file(app_handle: &tauri::AppHandle) -> Result<std::path::PathBuf, Str
   Ok(config_dir.join("api_key.json"))
 }
 
+fn load_request_body() -> anyhow::Result<Value> {
+  let request_file = fs::read_to_string("src/dialogue_prompt.json")?;
+  let request_body: Value = serde_json::from_str(&request_file)?;
+  Ok(request_body)
+}
+
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -48,13 +56,13 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![my_custom_command, save_api_key, get_conversations, get_dialogue])
+    .invoke_handler(tauri::generate_handler![generate_dialogue, save_api_key, get_conversations, get_dialogue])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
 
 #[tauri::command]
-async fn my_custom_command(state: tauri::State<'_, AppState>, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn generate_dialogue(state: tauri::State<'_, AppState>, app_handle: tauri::AppHandle, prompt: String) -> Result<String, String> {
   // TODO: This assumes the config file exists, which isn't true on first run
   let key_path = get_api_file(&app_handle)?;
   let api_config = fs::read_to_string(&key_path)
@@ -63,7 +71,12 @@ async fn my_custom_command(state: tauri::State<'_, AppState>, app_handle: tauri:
     .map_err(|e| e.to_string())?;
   let api_key = config_json.api_key;
 
-  let dialogue = gemini::generate_dialogue(api_key)
+  // Hydrate the request with the user's prompt
+  let mut request_body = load_request_body()
+    .map_err(|e| e.to_string())?;
+  request_body["input"] = json!(prompt);
+
+  let dialogue = gemini::generate_dialogue(api_key, request_body)
     .await
     .map_err(|e| e.to_string())?;
 
