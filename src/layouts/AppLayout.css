@@ -18,3 +18,14 @@ div#root {
 .appLayout div {
   flex-grow: 1;
 }
+
+.titleBar {
+  padding: 7pt 5pt 7pt 5pt;
+  flex-grow: 0 !important;
+  display: flex;
+}
+
+.titleBar h1 {
+  font-size: 16pt;
+  font-weight: 600;
+}

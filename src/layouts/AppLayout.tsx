@@ -1,14 +1,19 @@
+import { useState } from "react";
 import "./AppLayout.css";
 
-import TitleBar from "../components/TitleBar.tsx";
+import Menu from "../components/Menu.tsx";
 
-function AppLayout({ children }) {
+export default function AppLayout({ children }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="appLayout">
-      <TitleBar />
+      <div className="titleBar">
+        <button onClick={() => setIsOpen(true)}>Menu</button>
+        <h1>French</h1>
+      </div>
+      <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} />
       {children}
     </div>
   );
 }
-
-export default AppLayout;

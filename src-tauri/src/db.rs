@@ -1,7 +1,14 @@
 use rusqlite::{params, Connection, Result};
+use serde::{ Serialize, Deserialize };
 use uuid::Uuid;
 
 use crate::gemini::Dialogue;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConversationInfo {
+  uuid: String,
+  title: String,
+}
 
 pub fn write_dialogue(conn: &mut Connection, dialogue: &Dialogue) -> Result<String> {
   let conversation_id = Uuid::now_v7().to_string();
@@ -58,4 +65,19 @@ pub fn get_dialogue(conn: &mut Connection, conversation_id: &str) -> Result<Dial
     .collect::<Result<Vec<_>, _>>()?;
 
   Ok(Dialogue { title, people, dialogue })
+}
+
+pub fn get_conversations(conn: &mut Connection) -> Result<Vec<ConversationInfo>> {
+  // TODO: Will need to do proper pagination if user wants to load more than last 10 conversations
+  let mut stmt = conn.prepare(
+    "SELECT uuid, title FROM conversations ORDER BY created_date DESC LIMIT 10"
+  )?;
+  let conversation_list = stmt
+    .query_map([], |row| {
+      let uuid: String = row.get(0)?;
+      let title: String = row.get(1)?;
+      Ok(ConversationInfo { uuid, title })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+  Ok(conversation_list)
 }

@@ -5,6 +5,7 @@ use std::fs;
 use std::sync::Mutex;
 
 use crate::gemini::Dialogue;
+use crate::db::ConversationInfo;
 
 mod gemini;
 mod db;
@@ -47,7 +48,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![my_custom_command, save_api_key, get_dialogue])
+    .invoke_handler(tauri::generate_handler![my_custom_command, save_api_key, get_conversations, get_dialogue])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -76,6 +77,14 @@ async fn get_dialogue(state: tauri::State<'_, AppState>, conversation_id: String
   let mut conn = state.conn.lock().unwrap();
 
   db::get_dialogue(&mut conn, &conversation_id)
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_conversations(state: tauri::State<'_, AppState>) -> Result<Vec<ConversationInfo>, String> {
+  let mut conn = state.conn.lock().unwrap();
+
+  db::get_conversations(&mut conn)
     .map_err(|e| e.to_string())
 }
 
