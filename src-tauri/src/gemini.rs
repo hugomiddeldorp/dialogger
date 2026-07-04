@@ -1,5 +1,16 @@
 use serde_json::Value;
 use serde::{ Serialize, Deserialize };
+use rusqlite::{
+  types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
+  Result,
+};
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum Voice {
+  Male,
+  Female,
+}
 
 #[derive(Deserialize, Debug)]
 struct GeminiResponse {
@@ -19,8 +30,33 @@ struct ContentBlock {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Dialogue {
     pub title: String,
-    pub people: [String; 2],
+    pub people: [DialogueParticipant; 2],
     pub dialogue: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DialogueParticipant {
+  pub name: String,
+  pub voice: Voice,
+}
+
+impl ToSql for Voice {
+  fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+    Ok(match self {
+      Voice::Male => "male".into(),
+      Voice::Female => "female".into(),
+    })
+  }
+}
+
+impl FromSql for Voice {
+  fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+    match value.as_str()? {
+      "male" => Ok(Voice::Male),
+      "female" => Ok(Voice::Female),
+      _ => Err(FromSqlError::InvalidType),
+    }
+  }
 }
 
 fn extract_dialogue(resp: GeminiResponse) -> anyhow::Result<Dialogue> {

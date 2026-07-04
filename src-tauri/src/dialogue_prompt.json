@@ -20,10 +20,22 @@
                 },
                 "people": {
                     "type": "array",
-                    "description": "The names (or role if for example the dialogue is with a butcher) of the people involved in the dialogue, in their order of apparition. This should only be two items.",
+                    "description": "The names (or role if for example the dialogue is with a butcher) and voice type of the people involved in the dialogue, in their order of apparition. This should only be two items.",
                     "items": {
-                        "type": "string",
-                        "maxItems": 2
+                        "type": "object",
+                        "maxItems": 2,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "voice": {
+                                "type": "string",
+                                "enum": [
+                                    "male",
+                                    "female"
+                                ]
+                            }
+                        }
                     }
                 },
                 "dialogue": {

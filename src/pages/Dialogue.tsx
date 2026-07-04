@@ -9,8 +9,13 @@ import DialogueLine from "../components/DialogueLine.tsx";
 
 interface DialogueInterface {
   title: string;
-  people: string[];
+  people: DialogueParticipant[];
   dialogue: string[];
+}
+
+export interface DialogueParticipant {
+  name: string;
+  voice: string;
 }
 
 function Dialogue() {

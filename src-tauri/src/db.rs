@@ -2,12 +2,26 @@ use rusqlite::{params, Connection, Result};
 use serde::{ Serialize, Deserialize };
 use uuid::Uuid;
 
-use crate::gemini::Dialogue;
+use crate::gemini::{Dialogue, DialogueParticipant};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConversationInfo {
   uuid: String,
   title: String,
+}
+
+pub fn run_migrations(conn: &mut Connection) -> Result<()> {
+  let version: i32 = conn.query_row("PRAGMA user_version", [], |r| r.get(0))?;
+
+  if version < 1 {
+    conn.execute(
+      "ALTER TABLE participants
+      ADD COLUMN voice TEXT NOT NULL
+      CHECK(voice IN ('male', 'female')) DEFAULT 'female'",
+      [])?;
+    conn.execute("PRAGMA user_version = 1", [])?;
+  }
+  Ok(())
 }
 
 pub fn write_dialogue(conn: &mut Connection, dialogue: &Dialogue) -> Result<String> {
@@ -19,10 +33,10 @@ pub fn write_dialogue(conn: &mut Connection, dialogue: &Dialogue) -> Result<Stri
     params![conversation_id, dialogue.title]
   )?;
 
-  for (i, name) in dialogue.people.iter().enumerate() {
+  for (i, participant) in dialogue.people.iter().enumerate() {
     tx.execute(
-      "INSERT INTO participants (conversation_id, \"name\", position) VALUES (?1, ?2, ?3)",
-      params![conversation_id, name, i as u8]
+      "INSERT INTO participants (conversation_id, \"name\", position, voice) VALUES (?1, ?2, ?3, ?4)",
+      params![conversation_id, participant.name, i as u8, participant.voice]
     )?;
   }
 
@@ -47,14 +61,20 @@ pub fn get_dialogue(conn: &mut Connection, conversation_id: &str) -> Result<Dial
 
   // Get participants
   let mut stmt = conn.prepare(
-    "SELECT name FROM participants WHERE conversation_id = ?1 ORDER BY \"position\""
+    "SELECT name, voice FROM participants WHERE conversation_id = ?1 ORDER BY \"position\""
   )?;
-  let people: Vec<String> = stmt
-    .query_map(params![conversation_id], |row| row.get(0))?
+  let people: Vec<DialogueParticipant> = stmt
+    .query_map(params![conversation_id], |row| {
+      Ok(DialogueParticipant {
+        name: row.get(0)?,
+        voice: row.get(1)?
+      })
+    })?
     .collect::<Result<Vec<_>, _>>()?;
-  let people: [String; 2] = people.try_into().map_err(|v: Vec<String>| {
-    rusqlite::Error::InvalidParameterCount(v.len(), 2)
-  })?;
+  let people: [DialogueParticipant; 2] = people.try_into()
+    .map_err(|v: Vec<DialogueParticipant>| {
+      rusqlite::Error::InvalidParameterCount(v.len(), 2)
+    })?;
 
   // Get lines of dialogue
   let mut stmt = conn.prepare(

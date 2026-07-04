@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
+import type { DialogueParticipant } from "../pages/Dialogue.tsx";
 import "./DialogueLine.css";
 
 enum SpeakingState {
@@ -13,12 +14,12 @@ export default function DialogueLine({
   author,
   text,
 }: {
-  author: string;
+  author: DialogueParticipant;
   text: string;
 }) {
   const [speakingState, setSpeakingState] = useState(SpeakingState.Idle);
 
-  async function handleSpeak(text: string) {
+  async function handleSpeak(text: string, voice: string) {
     // TODO: Implement multi-speaker
     // TODO: Future improvement: cache the response to replay without regenerating
     // TODO: Call is not exclusive, probably should be
@@ -26,6 +27,7 @@ export default function DialogueLine({
     setSpeakingState(SpeakingState.Loading);
     const wavBytes = await invoke<number[]>("speak", {
       text: text,
+      voice: voice,
     });
     const arrayBuffer = new Uint8Array(wavBytes).buffer;
 
@@ -50,9 +52,9 @@ export default function DialogueLine({
 
   return (
     <div className="dialogueLine">
-      <h2>{author}</h2>
+      <h2>{author.name}</h2>
       <p
-        onClick={() => handleSpeak(text)}
+        onClick={() => handleSpeak(text, author.voice)}
         className={styleSpeakingState(speakingState)}
       >
         {text}

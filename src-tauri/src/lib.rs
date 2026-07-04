@@ -46,7 +46,10 @@ pub fn run() {
         .expect("could not result app data dir");
       let mut conn = Connection::open(config_dir.join("app.db"))
         .expect("failed to open DB");
+
+      // Run schema and migrations
       conn.execute_batch(SCHEMA)?;
+      db::run_migrations(&mut conn)?;
 
       app.manage(AppState { conn: Mutex::new(conn) });
 
@@ -117,17 +120,24 @@ async fn save_api_key(app_handle: tauri::AppHandle, key_string: String) -> Resul
 }
 
 #[tauri::command]
-async fn speak(app: tauri::AppHandle, text: String) -> Result<Vec<u8>, String> {
+async fn speak(app: tauri::AppHandle, text: String, voice: String) -> Result<Vec<u8>, String> {
   let model_path = app.path().resolve("models/fr_FR-upmc-medium.onnx", BaseDirectory::Resource)
     .map_err(|e| e.to_string())?;
   let model_config_path = app.path().resolve("models/fr_FR-upmc-medium.onnx.json", BaseDirectory::Resource)
     .map_err(|e| e.to_string())?;
 
+  // TODO: this will not be consistent across different models
+  let speaker_id = match voice.as_str() {
+    "female"=> Some(0),
+    "male"=> Some(1),
+    _=> None,
+  };
+
   let mut piper = Piper::new(&model_path.as_path(), &model_config_path.as_path())
     .map_err(|e| e.to_string())?;
 
   let (samples, sample_rate) = piper
-    .create(&text, false, None, None, None, None)
+    .create(&text, false, speaker_id, None, None, None)
     .map_err(|e| e.to_string())?;
 
   let wav_bytes = encode_wav(&samples, sample_rate)
