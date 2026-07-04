@@ -7,8 +7,6 @@ This is still a WIP, some features may be unpolished or unfinished.
 
 ## Roadmap
 
-- [In progress] Adding TTS
-    - Currently looking into using Piper
 - Polish CSS
     - Buttons
     - Loading
