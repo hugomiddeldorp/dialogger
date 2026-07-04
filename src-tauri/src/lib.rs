@@ -1,9 +1,12 @@
 use tauri::Manager;
+use tauri::path::BaseDirectory;
 use rusqlite::Connection;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Value};
 use std::fs;
 use std::sync::Mutex;
+use std::io::Cursor;
+use piper_rs::Piper;
 
 use crate::gemini::Dialogue;
 use crate::db::ConversationInfo;
@@ -56,7 +59,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![generate_dialogue, save_api_key, get_conversations, get_dialogue])
+    .invoke_handler(tauri::generate_handler![generate_dialogue, save_api_key, get_conversations, get_dialogue, speak])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -111,4 +114,43 @@ async fn save_api_key(app_handle: tauri::AppHandle, key_string: String) -> Resul
     .map_err(|e| e.to_string())?;
 
   Ok(())
+}
+
+#[tauri::command]
+async fn speak(app: tauri::AppHandle, text: String) -> Result<Vec<u8>, String> {
+  let model_path = app.path().resolve("models/fr_FR-upmc-medium.onnx", BaseDirectory::Resource)
+    .map_err(|e| e.to_string())?;
+  let model_config_path = app.path().resolve("models/fr_FR-upmc-medium.onnx.json", BaseDirectory::Resource)
+    .map_err(|e| e.to_string())?;
+
+  let mut piper = Piper::new(&model_path.as_path(), &model_config_path.as_path())
+    .map_err(|e| e.to_string())?;
+
+  let (samples, sample_rate) = piper
+    .create(&text, false, None, None, None, None)
+    .map_err(|e| e.to_string())?;
+
+  let wav_bytes = encode_wav(&samples, sample_rate)
+    .map_err(|e| e.to_string())?;
+
+  Ok(wav_bytes)
+}
+
+fn encode_wav(samples: &[f32], sample_rate: u32) -> Result<Vec<u8>, hound::Error> {
+  let spec = hound::WavSpec {
+    channels: 1,
+    sample_rate,
+    bits_per_sample: 32,
+    sample_format: hound::SampleFormat::Float,
+  };
+
+  let mut cursor = Cursor::new(Vec::new());
+  let mut writer = hound::WavWriter::new(&mut cursor, spec)?;
+
+  for &sample in samples {
+    writer.write_sample(sample)?;
+  }
+  writer.finalize()?;
+
+  Ok(cursor.into_inner())
 }

@@ -11,3 +11,15 @@ h2 {
 p {
   font-family: Spectral;
 }
+
+p:hover {
+  cursor: pointer
+}
+
+p.loading {
+  background-color: green;
+}
+
+p.playing {
+  background-color: blue;
+}
