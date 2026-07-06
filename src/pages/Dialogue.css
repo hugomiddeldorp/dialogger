@@ -1,3 +1,5 @@
 .dialogue {
   padding: 30pt;
+  max-width: 600px;
+  margin: auto;
 }
