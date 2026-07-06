@@ -5,6 +5,8 @@ for learning the basics of a language for travel purposes.
 
 This is still a WIP, some features may be unpolished or unfinished.
 
+![Screenshot of the app](./screenshot.png)
+
 ## Roadmap
 
 - Language selection
