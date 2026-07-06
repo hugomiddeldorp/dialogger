@@ -7,11 +7,7 @@ This is still a WIP, some features may be unpolished or unfinished.
 
 ## Roadmap
 
-- Polish CSS
-    - Buttons
-    - Loading
-    - Animations
-- Error handling
+- [In progress] Caching audio from dialogue lines
 - Language selection
     - Will require library of languages for TTS models
 - Cross platform builds
