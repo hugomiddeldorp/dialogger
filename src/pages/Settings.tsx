@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { toast } from "sonner";
 
 import AppLayout from "../layouts/AppLayout.tsx";
 
@@ -21,9 +22,10 @@ export default function Settings() {
       await invoke<string>("save_api_key", {
         keyString: apiKey,
       });
+      toast.success("API Key set successfully.");
       navigate("/");
     } catch (err) {
-      console.log(err);
+      toast.error("API Key could not be set.", { description: err });
     }
   }
 
@@ -36,6 +38,7 @@ export default function Settings() {
             name="api_key"
             id="api_key"
             placeholder="API Key"
+            required
             value={apiKey}
             onChange={onInputChange}
           />

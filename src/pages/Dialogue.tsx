@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 
 import "./Dialogue.css";
 
@@ -23,14 +24,15 @@ function Dialogue() {
   const conversationId = params.conversationId;
 
   const [dialogue, setDialogue] = useState<DialogueInterface | null>(null);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     invoke<DialogueInterface>("get_dialogue", {
       conversationId: conversationId,
     })
       .then(setDialogue)
-      .catch((e) => setError(String(e)));
+      .catch((err) => {
+        toast.error("Error fetching dialogue", { description: err });
+      });
   }, [conversationId]);
 
   // TODO: I'm not sure if this is the best way to do it

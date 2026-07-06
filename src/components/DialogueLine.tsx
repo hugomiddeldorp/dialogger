@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { toast } from "sonner";
 
 import type { DialogueParticipant } from "../pages/Dialogue.tsx";
 import "./DialogueLine.css";
@@ -25,23 +26,27 @@ export default function DialogueLine({
     // TODO: Call is not exclusive, probably should be
 
     setSpeakingState(SpeakingState.Loading);
-    const wavBytes = await invoke<number[]>("speak", {
-      text: text,
-      voice: voice,
-    });
-    const arrayBuffer = new Uint8Array(wavBytes).buffer;
+    try {
+      const wavBytes = await invoke<number[]>("speak", {
+        text: text,
+        voice: voice,
+      });
+      const arrayBuffer = new Uint8Array(wavBytes).buffer;
 
-    const ctx = new AudioContext();
-    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+      const ctx = new AudioContext();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
 
-    const source = ctx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(ctx.destination);
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
 
-    source.onended = () => setSpeakingState(SpeakingState.Idle);
+      source.onended = () => setSpeakingState(SpeakingState.Idle);
 
-    setSpeakingState(SpeakingState.Playing);
-    source.start();
+      setSpeakingState(SpeakingState.Playing);
+      source.start();
+    } catch (err) {
+      toast.error("Could not play dialogue line.", { description: err });
+    }
   }
 
   function styleSpeakingState(state: SpeakingState) {

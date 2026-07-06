@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { toast } from "sonner";
 
 import "./Home.css";
 import AppLayout from "../layouts/AppLayout.tsx";
@@ -9,7 +10,6 @@ export default function Home() {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState("");
 
   async function onInputChange(e) {
     setPrompt(e.target.value);
@@ -17,14 +17,12 @@ export default function Home() {
 
   async function handleGenerate() {
     setIsGenerating(true);
-    setError("");
 
     try {
       const conversationId = await invoke("generate_dialogue", { prompt });
       navigate(`/dialogue/${conversationId}`);
     } catch (err) {
-      setError(String(err));
-      console.log(error);
+      toast.error("Error generating dialogue", { description: err });
       setIsGenerating(false);
     }
   }
