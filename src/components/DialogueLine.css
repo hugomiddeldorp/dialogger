@@ -10,16 +10,35 @@ h2 {
 
 p {
   font-family: Spectral;
+  padding 5pt;
 }
 
 p:hover {
   cursor: pointer
 }
 
-p.loading {
-  background-color: green;
+span.loading {
+  border-radius: 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: pulse-glow 1.2s ease-in-out infinite;
 }
 
-p.playing {
-  background-color: blue;
+span.playing {
+  background-color: var(--colour-neutral-300);
+  box-shadow: 0 0 0 6pt var(--colour-neutral-300);
+  border-radius: 2pt;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    background-color: var(--colour-neutral-300);
+    box-shadow: 0 0 0 6pt var(--colour-neutral-300);
+  }
+  50% {
+    background-color: var(--colour-stone);
+    box-shadow: 0 0 0 4pt var(--colour-stone);
+  }
 }

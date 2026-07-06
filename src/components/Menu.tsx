@@ -21,8 +21,13 @@ export default function Menu({
 
   return (
     <aside className={`menu ${isOpen ? "open" : ""}`}>
-      <button onClick={onClose}>Close</button>
-      Previous conversations
+      <div className="head">
+        <i onClick={onClose} className="icon icon-close"></i>
+        <Link to="/">
+          <i className="icon icon-home"></i>
+        </Link>
+      </div>
+      <h1>Previous conversations</h1>
       <ul>
         {conversations.map((entry) => (
           <li>
@@ -32,7 +37,11 @@ export default function Menu({
           </li>
         ))}
       </ul>
-      <Link to="/settings">Settings</Link>
+      <Link to="/settings">
+        <div className="settings-button">
+          <i className="icon icon-settings"></i>Settings
+        </div>
+      </Link>
     </aside>
   );
 }

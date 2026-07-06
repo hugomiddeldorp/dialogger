@@ -32,7 +32,10 @@ export default function Home() {
   return (
     <AppLayout>
       {isGenerating ? (
-        <div className="home">Generating...</div>
+        <div className="generating">
+          <span className="text">Generating</span>
+          <div className="loader"></div>
+        </div>
       ) : (
         <div className="home">
           <form
@@ -48,7 +51,9 @@ export default function Home() {
               value={prompt}
               onChange={onInputChange}
             />
-            <button type="submit">&gt;</button>
+            <button type="submit">
+              <i className="icon icon-arrow"></i>
+            </button>
           </form>
         </div>
       )}

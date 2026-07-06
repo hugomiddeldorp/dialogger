@@ -13,6 +13,7 @@ div#root {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding-top: 5pt;
 }
 
 .appLayout div {
@@ -23,6 +24,7 @@ div#root {
   padding: 7pt 5pt 7pt 5pt;
   flex-grow: 0 !important;
   display: flex;
+  align-items: center;
 }
 
 .titleBar h1 {

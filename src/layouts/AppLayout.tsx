@@ -9,7 +9,7 @@ export default function AppLayout({ children }) {
   return (
     <div className="appLayout">
       <div className="titleBar">
-        <button onClick={() => setIsOpen(true)}>Menu</button>
+        <i onClick={() => setIsOpen(true)} className="icon icon-menu"></i>
         <h1>French</h1>
       </div>
       <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} />

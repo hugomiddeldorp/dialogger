@@ -1,20 +1,49 @@
 .menu {
-  background: lightgrey;
+  background: var(--colour-neutral-300);
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 250px;
+  width: 300px;
   transform: translateX(-100%);
   overflow: scroll;
+  padding: 10pt 10pt 0pt 10pt;
+  transition: transform 0.2s ease-in-out;
+}
+
+.menu .head {
+  display: flex;
+  justify-content: space-between;
 }
 
 .menu.open {
   transform: translateX(0);
 }
 
+.menu .icon {
+  margin: 0;
+}
+
+.menu h1 {
+  font-weight: 600;
+  margin: 5pt 0 10pt 0;
+}
+
 .menu li {
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
+  margin: 2pt 0;
+}
+
+.menu a {
+  color: var(--colour-neutral-900);
+  text-decoration: none;
+}
+
+.menu .settings-button {
+  display: flex;
+  align-items: center;
+  gap: 5pt;
+  margin-top: 10pt;
 }

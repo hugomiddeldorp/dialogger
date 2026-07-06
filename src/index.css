@@ -93,3 +93,51 @@ html, body {
   --colour-highlight: #e00808;
 }
 
+.icon {
+    display: inline-block;
+    width: 1.3em;
+    height: 1.3em;
+    background-color: var(--colour-neutral-900);
+
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+
+    vertical-align: middle;
+
+    margin: 0 5pt 0 5pt;
+}
+
+.icon-arrow {
+    -webkit-mask-image: url("assets/icons/arrow_forward.svg");
+    mask-image: url("assets/icons/arrow_forward.svg");
+}
+
+.icon-close {
+    -webkit-mask-image: url("assets/icons/close.svg");
+    mask-image: url("assets/icons/close.svg");
+}
+
+.icon-key {
+    -webkit-mask-image: url("assets/icons/key.svg");
+    mask-image: url("assets/icons/key.svg");
+}
+
+.icon-menu {
+    -webkit-mask-image: url("assets/icons/menu.svg");
+    mask-image: url("assets/icons/menu.svg");
+}
+
+.icon-settings {
+    -webkit-mask-image: url("assets/icons/settings.svg");
+    mask-image: url("assets/icons/settings.svg");
+}
+
+.icon-home {
+    -webkit-mask-image: url("assets/icons/home.svg");
+    mask-image: url("assets/icons/home.svg");
+}

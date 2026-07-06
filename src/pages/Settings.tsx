@@ -4,6 +4,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 import AppLayout from "../layouts/AppLayout.tsx";
 
+import "./Settings.css";
+
 export default function Settings() {
   const navigate = useNavigate();
   const [apiKey, setApiKey] = useState("");
@@ -27,7 +29,7 @@ export default function Settings() {
 
   return (
     <AppLayout>
-      <div className="settings">
+      <div className="home">
         <form onSubmit={handleSave} method="" accept-charset="utf-8">
           <input
             type="text"
@@ -37,7 +39,9 @@ export default function Settings() {
             value={apiKey}
             onChange={onInputChange}
           />
-          <button type="submit">&gt;</button>
+          <button type="submit">
+            <i className="icon icon-key"></i>
+          </button>
         </form>
       </div>
     </AppLayout>

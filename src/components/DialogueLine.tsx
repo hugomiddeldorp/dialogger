@@ -53,11 +53,8 @@ export default function DialogueLine({
   return (
     <div className="dialogueLine">
       <h2>{author.name}</h2>
-      <p
-        onClick={() => handleSpeak(text, author.voice)}
-        className={styleSpeakingState(speakingState)}
-      >
-        {text}
+      <p onClick={() => handleSpeak(text, author.voice)}>
+        <span className={styleSpeakingState(speakingState)}>{text}</span>
       </p>
     </div>
   );
