@@ -4,9 +4,11 @@ use rusqlite::Connection;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Value};
 use std::fs;
+use std::collections::HashMap;
 use std::sync::Mutex;
 use std::io::Cursor;
 use piper_rs::Piper;
+use sha2::{Sha256, Digest};
 
 use crate::gemini::Dialogue;
 use crate::db::ConversationInfo;
@@ -22,7 +24,8 @@ struct ApiConfig {
 }
 
 struct AppState {
-  conn: Mutex<Connection>
+  conn: Mutex<Connection>,
+  dialogue_audio: Mutex<HashMap<String, Vec<u8>>>,
 }
 
 fn get_api_file(app_handle: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
@@ -51,7 +54,7 @@ pub fn run() {
       conn.execute_batch(SCHEMA)?;
       db::run_migrations(&mut conn)?;
 
-      app.manage(AppState { conn: Mutex::new(conn) });
+      app.manage(AppState { conn: Mutex::new(conn), dialogue_audio: Mutex::new(HashMap::new()) });
 
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -120,7 +123,14 @@ async fn save_api_key(app_handle: tauri::AppHandle, key_string: String) -> Resul
 }
 
 #[tauri::command]
-async fn speak(app: tauri::AppHandle, text: String, voice: String) -> Result<Vec<u8>, String> {
+async fn speak(state: tauri::State<'_, AppState>, app: tauri::AppHandle, text: String, voice: String) -> Result<Vec<u8>, String> {
+  // Check if the audio is cached
+  let key = hash_dialogue_line(&voice, &text);
+  let mut map = state.dialogue_audio.lock().unwrap();
+  if let Some(bytes) = map.get(&key) {
+    return Ok(bytes.clone())
+  }
+
   let model_path = app.path().resolve("models/fr_FR-upmc-medium.onnx", BaseDirectory::Resource)
     .map_err(|e| e.to_string())?;
   let model_config_path = app.path().resolve("models/fr_FR-upmc-medium.onnx.json", BaseDirectory::Resource)
@@ -143,6 +153,9 @@ async fn speak(app: tauri::AppHandle, text: String, voice: String) -> Result<Vec
   let wav_bytes = encode_wav(&samples, sample_rate)
     .map_err(|e| e.to_string())?;
 
+  // Cache the audio
+  map.insert(key, wav_bytes.clone());
+
   Ok(wav_bytes)
 }
 
@@ -163,4 +176,12 @@ fn encode_wav(samples: &[f32], sample_rate: u32) -> Result<Vec<u8>, hound::Error
   writer.finalize()?;
 
   Ok(cursor.into_inner())
+}
+
+fn hash_dialogue_line(voice: &str, text: &str) -> String {
+  let mut hasher = Sha256::new();
+  hasher.update(voice.as_bytes());
+  hasher.update(b"\0");
+  hasher.update(text.as_bytes());
+  format!("{:x}", hasher.finalize())
 }
